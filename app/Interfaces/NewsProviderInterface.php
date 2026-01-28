@@ -4,7 +4,7 @@ namespace App\Interfaces;
 
 use Illuminate\Support\Collection;
 
-interface NewsSourceInterface
+interface NewsProviderInterface
 {
     public function fetchArticles(): Collection;
 

@@ -4,7 +4,7 @@ namespace App\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
 
-final class AuthorData extends Data
+final class ArticleAuthorDto extends Data
 {
     public function __construct(
         readonly public ?int $id,

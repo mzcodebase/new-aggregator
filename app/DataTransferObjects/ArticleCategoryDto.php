@@ -4,7 +4,7 @@ namespace App\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
 
-final class CategoryData extends Data
+final class ArticleCategoryDto extends Data
 {
     public function __construct(
         readonly public ?int $id,

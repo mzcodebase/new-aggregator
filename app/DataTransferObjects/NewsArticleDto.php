@@ -9,7 +9,7 @@ use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
-final class ArticleData extends Data
+final class NewsArticleDto extends Data
 {
     public function __construct(
         readonly public ?int $id,
@@ -22,9 +22,9 @@ final class ArticleData extends Data
         readonly public string $url,
         readonly public ?string $image,
         readonly public CarbonImmutable $published_at,
-        #[DataCollectionOf(AuthorData::class)]
+        #[DataCollectionOf(ArticleAuthorDto::class)]
         public DataCollection|Lazy|null $authors,
-        #[DataCollectionOf(CategoryData::class)]
+        #[DataCollectionOf(ArticleCategoryDto::class)]
         public DataCollection|Lazy|null $categories,
     ) {
     }
@@ -37,10 +37,10 @@ final class ArticleData extends Data
             ...$articleAttributes,
             'published_at' => CarbonImmutable::parse($articleModel->published_at),
             'authors' => Lazy::whenLoaded('authors', $articleModel, 
-                fn () => AuthorData::collect($articleModel->authors)
+                fn () => ArticleAuthorDto::collect($articleModel->authors)
             ),
             'categories' => Lazy::whenLoaded('categories', $articleModel, 
-                fn () => CategoryData::collect($articleModel->categories)
+                fn () => ArticleCategoryDto::collect($articleModel->categories)
             ),
         ])->exclude('author', 'category');
     }
