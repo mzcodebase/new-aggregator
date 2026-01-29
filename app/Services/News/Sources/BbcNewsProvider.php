@@ -33,10 +33,33 @@ final class BbcNewsProvider extends BaseNewsProvider
             'lang' => $language,
         ]);
 
-        $articlesList = $apiResponse['latest'] ?? [];
+        $articlesList = $this->extractNewsItemsFromResponse($apiResponse);
         $transformationCallback = $this->mapCallBack();
 
         return $this->processItemsLazily($articlesList, $transformationCallback);
+    }
+
+    private function extractNewsItemsFromResponse(array $apiResponse): array
+    {
+        $metaKeys = ['status', 'elapsed time', 'timestamp'];
+        $seenUrls = [];
+        $items = [];
+
+        foreach ($apiResponse as $key => $value) {
+            if (in_array($key, $metaKeys, true) || ! is_array($value)) {
+                continue;
+            }
+
+            foreach ($value as $entry) {
+                if (! is_array($entry) || empty($entry['title'])) {
+                    continue;
+                }
+
+                $items[] = $entry;
+            }
+        }
+
+        return $items;
     }
 
     public function getName(): string
@@ -47,6 +70,9 @@ final class BbcNewsProvider extends BaseNewsProvider
     public function mapCallBack(): Closure
     {
         return function ($bbcArticle) {
+            $url = $bbcArticle['news_link'] ?? '';
+            $url = mb_substr((string) $url, 0, 255);
+
             return NewsArticleDto::from([
                 'title' => $bbcArticle['title'] ?? '',
                 'description' => $bbcArticle['summary'] ?? null,
@@ -54,7 +80,7 @@ final class BbcNewsProvider extends BaseNewsProvider
                 'author' => null,
                 'category' => null,
                 'source' => 'BBC News',
-                'url' => $bbcArticle['news_link'] ?? '',
+                'url' => $url,
                 'image' => $bbcArticle['image_link'] ?? null,
                 'published_at' => CarbonImmutable::now(),
             ]);

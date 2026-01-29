@@ -41,6 +41,7 @@ abstract class BaseNewsProvider implements NewsProviderInterface
         try {
             $apiBaseUrl = $this->resolveApiBaseUrl();
             $fullUrl = $apiBaseUrl . '/' . ltrim($endpoint, '/');
+            Log::info("Full URL: {$fullUrl}");
             $httpResponse = Http::get($fullUrl, $queryParams);
 
             if (!$httpResponse->successful()) {
