@@ -42,16 +42,6 @@ return [
         'language' => env('BBC_LANGUAGE', 'english'),
     ],
 
-    'opennews' => [
-        'enabled' => env('OPENNEWS_ENABLED', false),
-        'rate_limit' => [
-            'max_requests' => 10,
-            'per_minutes' => 1,
-        ],
-        'base_url' => env('OPENNEWS_API_URL', 'https://opennewsapi.herokuapp.com'),
-        'articles_endpoint' => env('OPENNEWS_ARTICLES_ENDPOINT', 'api/articles'),
-    ],
-
     'newscred' => [
         'enabled' => env('NEWSCRED_ENABLED', false),
         'rate_limit' => [
