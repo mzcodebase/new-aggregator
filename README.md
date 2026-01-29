@@ -1,59 +1,145 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# News Aggregator API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A powerful Laravel  application that aggregates news from multiple sources including NewsAPI, The Guardian, New York Times and BBC News. This API provides endpoints to search, filter, and retrieve news articles from various sources in a unified format.
 
-## About Laravel
+## 📋 Prerequisites
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Before you begin, ensure you have the following installed on your system:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **PHP** >= 8.2
+- **Composer** >= 2.0
+- **MySQL** >= 8.0
+- **Node.js** >= 18.x (for frontend assets)
+- **Git**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Installation
 
-## Learning Laravel
+### 1. Clone the Repository
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```
+git clone https://github.com/mzcodebase/new-aggregator.git
+cd new-aggregator
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Install Dependencies
 
-## Laravel Sponsors
+```
+composer install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 3. Environment Configuration
 
-### Premium Partners
+Copy the environment example file:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```
+cp .env.example .env
+```
 
-## Contributing
+### 4. Generate Application Key
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+php artisan key:generate
+```
 
-## Code of Conduct
+### 5. Database Setup
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Configure your database connection in the `.env` file:
 
-## Security Vulnerabilities
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=news_aggregator
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 6. Run Migrations
 
-## License
+```
+php artisan migrate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 7. Seed the Database
+
+```
+php artisan db:seed
+```
+
+You need to create accounts and obtain API keys from the following news sources:
+
+### Required API Accounts
+
+| Provider | Website | Documentation |
+|----------|---------|---------------|
+| **NewsAPI.org** | [https://newsapi.org/](https://newsapi.org/) | [Docs](https://newsapi.org/docs) |
+| **The Guardian** | [https://open-platform.theguardian.com/](https://open-platform.theguardian.com/) | [Docs](https://open-platform.theguardian.com/documentation/) |
+| **New York Times** | [https://developer.nytimes.com/](https://developer.nytimes.com/) | [Docs](https://developer.nytimes.com/docs) |
+
+### Environment Variables
+
+```env
+NEWSAPI_ENABLED=true
+NEWSAPI_KEY=your_news_api_key_here
+NEWS_API_URL=https://newsapi.org/v2
+
+GUARDIAN_ENABLED=true
+GUARDIAN_KEY=your_guardian_api_key_here
+GUARDIAN_BASE_URL=https://content.guardianapis.com
+
+NYT_ENABLED=true
+NYT_KEY=your_NYT_api_key_here
+NYT_SECRET=your_NYT_api_secret_here
+NYT_API_URL=https://api.nytimes.com/svc
+
+BBC_ENABLED=true
+BBC_API_URL=https://bbc-news-api.vercel.app
+BBC_LANGUAGE=english
+```
+
+## 🏃‍♂️ Running the Application
+
+### Development Server
+
+```bash
+php artisan serve
+```
+
+The application will be available at `http://localhost:8000`
+### Run the Scheduler
+The scheduler dispatches fetching articles job at the configured intervals(every minute):
+```
+php artisan schedule:work
+```
+### Run Queue Worker background job - API Article Fetching
+```
+php artisan queue:work
+```
+### Base URL
+```
+http://localhost:8000/api/v1
+```
+
+## 🔄 Data Synchronization
+
+The application includes commands to fetch and sync data from news sources:
+
+```
+# Fetch articles from all sources
+php artisan fetch:articles
+
+# Fetch from specific source
+php artisan fetch:articles --source=newsapi
+php artisan fetch:articles --source=guardian
+php artisan fetch:articles --source=nyt
+```
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+
+1. Check the [Issues](https://github.com/mzcodebase/new-aggregator/issues) page
+2. Create a new issue with detailed information
+3. Provide error logs and environment details
+
+---
