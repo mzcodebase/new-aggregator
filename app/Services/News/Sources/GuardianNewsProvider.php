@@ -16,7 +16,7 @@ final class GuardianNewsProvider extends BaseNewsProvider
     {
         $guardianConfig = config('news_sources.guardian');
         $this->apiKey = $guardianConfig['key'] ?? '';
-        $configuredBaseUrl = $guardianConfig['base_url'];
+        $configuredBaseUrl = $guardianConfig['base_url'] ?? 'https://content.guardianapis.com';
         $this->baseUrl = rtrim($configuredBaseUrl, '/') . '/';
 
         parent::__construct($this->apiKey);

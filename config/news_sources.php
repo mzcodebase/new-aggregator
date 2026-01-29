@@ -28,4 +28,31 @@ return [
         'secret' => env('NYT_SECRET'),
         'base_url' => env('NYT_API_URL', 'https://api.nytimes.com'),
     ],
+
+    'bbc' => [
+        'rate_limit' => [
+            'max_requests' => 5,
+            'per_minutes' => 1,
+        ],
+        'base_url' => env('BBC_API_URL', 'https://bbc-news-api.vercel.app'),
+        'language' => env('BBC_LANGUAGE', 'english'),
+    ],
+
+    'opennews' => [
+        'rate_limit' => [
+            'max_requests' => 10,
+            'per_minutes' => 1,
+        ],
+        'base_url' => env('OPENNEWS_API_URL', 'https://opennewsapi.herokuapp.com'),
+        'articles_endpoint' => env('OPENNEWS_ARTICLES_ENDPOINT', 'api/news'),
+    ],
+
+    'newscred' => [
+        'rate_limit' => [
+            'max_requests' => 5,
+            'per_minutes' => 1,
+        ],
+        'key' => env('NEWSCRED_KEY'),
+        'base_url' => env('NEWSCRED_BASE_URL', 'https://api.newscred.com'),
+    ],
 ];

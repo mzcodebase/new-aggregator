@@ -3,10 +3,8 @@
 namespace App\Services\News\Sources;
 
 use App\Interfaces\NewsProviderInterface;
-use App\Services\News\ApiRequestRetryHandler;
 use Closure;
 use Exception;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -17,23 +15,9 @@ abstract class BaseNewsProvider implements NewsProviderInterface
 
     protected string $baseUrl;
 
-    protected ApiRequestRetryHandler $retryHandler;
-
     public function __construct(string $apiKey)
     {
         $this->apiKey = $apiKey;
-        $this->retryHandler = new ApiRequestRetryHandler(
-            exceptionRetryRules: [
-                ConnectionException::class => [
-                    'delayMs' => 2000,
-                    'exponentialBackoff' => true,
-                ],
-                RequestException::class => [
-                    'delayMs' => 1000,
-                    'exponentialBackoff' => false,
-                ],
-            ]
-        );
     }
 
     abstract public function getName(): string;
@@ -55,17 +39,15 @@ abstract class BaseNewsProvider implements NewsProviderInterface
         }
 
         try {
-            return $this->retryHandler->execute(function () use ($endpoint, $queryParams) {
-                $apiBaseUrl = $this->resolveApiBaseUrl();
-                $fullUrl = $apiBaseUrl . '/' . ltrim($endpoint, '/');
-                $httpResponse = Http::get($fullUrl, $queryParams);
+            $apiBaseUrl = $this->resolveApiBaseUrl();
+            $fullUrl = $apiBaseUrl . '/' . ltrim($endpoint, '/');
+            $httpResponse = Http::get($fullUrl, $queryParams);
 
-                if (!$httpResponse->successful()) {
-                    throw new RequestException($httpResponse);
-                }
+            if (!$httpResponse->successful()) {
+                throw new RequestException($httpResponse);
+            }
 
-                return $httpResponse->json();
-            });
+            return $httpResponse->json();
         } catch (Exception $exception) {
             Log::error("Failed to fetch from {$this->getName()}", [
                 'error' => $exception->getMessage(),

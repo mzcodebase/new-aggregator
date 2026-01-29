@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use App\Services\News\NewsAggregatorService;
+use App\Services\News\Sources\BbcNewsProvider;
 use App\Services\News\Sources\GuardianNewsProvider;
 use App\Services\News\Sources\NewsApiProvider;
+use App\Services\News\Sources\NewsCredProvider;
 use App\Services\News\Sources\NewYorkTimesProvider;
+use App\Services\News\Sources\OpenNewsProvider;
 use Illuminate\Support\ServiceProvider;
 
 final class NewsServiceProvider extends ServiceProvider
@@ -18,6 +21,9 @@ final class NewsServiceProvider extends ServiceProvider
             $aggregator->addProvider(new GuardianNewsProvider());
             $aggregator->addProvider(new NewsApiProvider());
             $aggregator->addProvider(new NewYorkTimesProvider());
+            $aggregator->addProvider(new BbcNewsProvider());
+            $aggregator->addProvider(new OpenNewsProvider());
+            $aggregator->addProvider(new NewsCredProvider());
 
             return $aggregator;
         });

@@ -16,7 +16,7 @@ final class NewYorkTimesProvider extends BaseNewsProvider
     {
         $nytConfig = config('news_sources.nyt');
         $this->apiKey = $nytConfig['key'] ?? '';
-        $configuredBaseUrl = $nytConfig['base_url'];
+        $configuredBaseUrl = $nytConfig['base_url'] ?? 'https://api.nytimes.com';
         $this->baseUrl = rtrim($configuredBaseUrl, '/') . '/search/v2/';
 
         parent::__construct($this->apiKey);
