@@ -16,8 +16,7 @@ final class NewsApiProvider extends BaseNewsProvider
     {
         $newsApiConfig = config('news_sources.newsapi');
         $this->apiKey = $newsApiConfig['key'] ?? '';
-        $defaultBaseUrl = 'https://newsapi.org/v2';
-        $configuredBaseUrl = $newsApiConfig['base_url'] ?? $defaultBaseUrl;
+        $configuredBaseUrl = $newsApiConfig['base_url'];
         $this->baseUrl = rtrim($configuredBaseUrl, '/') . '/';
 
         parent::__construct($this->apiKey);

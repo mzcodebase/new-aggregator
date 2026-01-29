@@ -10,7 +10,6 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 
 abstract class BaseNewsProvider implements NewsProviderInterface
 {
@@ -49,16 +48,9 @@ abstract class BaseNewsProvider implements NewsProviderInterface
         return $sourceConfig['base_url'] ?? $this->baseUrl;
     }
 
-    protected function buildRateLimitCacheKey(): string
-    {
-        return "rate_limit:{$this->getName()}";
-    }
-
     protected function fetch(string $endpoint, array $queryParams = []): array
     {
-        if (!$this->checkRateLimit()) {
-            Log::warning("Rate limit exceeded for {$this->getName()}");
-
+        if (!check_rate_limit($this->getName())) {
             return [];
         }
 
@@ -82,29 +74,5 @@ abstract class BaseNewsProvider implements NewsProviderInterface
 
             return [];
         }
-    }
-
-    protected function checkRateLimit(): bool
-    {
-        $cacheKey = $this->buildRateLimitCacheKey();
-        $sourceIdentifier = $this->getName();
-        $rateLimitSettings = config("news_sources.{$sourceIdentifier}.rate_limit");
-
-        if ($rateLimitSettings === null) {
-            return true;
-        }
-
-        $allowedRequests = $rateLimitSettings['max_requests'] ?? 10;
-        $timeWindowMinutes = $rateLimitSettings['per_minutes'] ?? 1;
-
-        if (RateLimiter::tooManyAttempts($cacheKey, $allowedRequests)) {
-            Log::warning("Rate limit exceeded for {$sourceIdentifier}");
-
-            return false;
-        }
-
-        RateLimiter::hit($cacheKey, $timeWindowMinutes * 60);
-
-        return true;
     }
 }
