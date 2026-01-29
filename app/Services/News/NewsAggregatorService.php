@@ -27,15 +27,23 @@ final class NewsAggregatorService
         return $this;
     }
 
-    public function fetchAndStore(): void
+    /**
+     * @return array{stored: int}
+     */
+    public function fetchAndStore(): array
     {
-        $this->providers->each(function (NewsProviderInterface $provider): void {
+        $totalStored = 0;
+
+        $this->providers->each(function (NewsProviderInterface $provider) use (&$totalStored): void {
             $articles = $provider->fetchArticles();
 
-            $articles->chunk(100)->each(function (Collection $chunk): void {
-                $this->persistArticles($chunk);
+            $articles->chunk(100)->each(function (Collection $chunk) use (&$totalStored): void {
+                $persisted = $this->persistArticles($chunk);
+                $totalStored += $persisted->count();
             });
         });
+
+        return ['stored' => $totalStored];
     }
 
     private function persistArticles(Collection $articleDtos): Collection

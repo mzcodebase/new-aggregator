@@ -2,22 +2,27 @@
 
 namespace App\Console\Commands;
 
-use App\Services\News\NewsAggregatorService;
+use App\Jobs\FetchArticlesJob;
 use Illuminate\Console\Command;
 
 final class FetchNewsCommand extends Command
 {
     protected $signature = 'news:fetch';
 
-    protected $description = 'Fetch news from all configured providers and store in the database';
+    protected $description = 'Fetch news from all configured providers and store in the database (dispatches one job per source)';
 
-    public function handle(NewsAggregatorService $aggregator): int
+    private const SOURCES = ['newsapi', 'guardian', 'nyt', 'bbc'];
+
+    public function handle(): int
     {
-        $this->info('Fetching news from configured providers...');
+        $this->info('Dispatching fetch jobs for all sources...');
 
-        $aggregator->fetchAndStore();
+        foreach (self::SOURCES as $source) {
+            $this->info("Dispatching fetch job for: {$source}");
+            FetchArticlesJob::dispatch($source);
+        }
 
-        $this->info('News fetch completed successfully.');
+        $this->info('All jobs dispatched successfully.');
 
         return Command::SUCCESS;
     }
