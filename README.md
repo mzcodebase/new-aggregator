@@ -1,8 +1,8 @@
-# News Aggregator API
+# Full-Stack News Aggregator Challenge
 
 A powerful Laravel  application that aggregates news from multiple sources including NewsAPI, The Guardian, New York Times and BBC News. This API provides endpoints to search, filter, and retrieve news articles from various sources in a unified format.
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
 
