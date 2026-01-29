@@ -19,6 +19,8 @@ final class NewYorkTimesProvider extends BaseNewsProvider
         $defaultBaseUrl = 'https://api.nytimes.com/svc';
         $configuredBaseUrl = $nytConfig['base_url'] ?? $defaultBaseUrl;
         $this->baseUrl = rtrim($configuredBaseUrl, '/') . '/search/v2/';
+
+        parent::__construct($this->apiKey);
     }
 
     public function fetchArticles(): Collection

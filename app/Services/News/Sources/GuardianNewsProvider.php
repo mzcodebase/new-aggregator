@@ -19,6 +19,8 @@ final class GuardianNewsProvider extends BaseNewsProvider
         $defaultBaseUrl = 'https://content.guardianapis.com';
         $configuredBaseUrl = $guardianConfig['base_url'] ?? $defaultBaseUrl;
         $this->baseUrl = rtrim($configuredBaseUrl, '/') . '/';
+
+        parent::__construct($this->apiKey);
     }
 
     public function fetchArticles(): Collection
