@@ -24,6 +24,10 @@ final class GuardianNewsProvider extends BaseNewsProvider
 
     public function fetchArticles(): Collection
     {
+        if (! config('news_sources.guardian.enabled', true)) {
+            return collect();
+        }
+
         $apiResponse = $this->fetch('search', [
             'api-key' => $this->apiKey,
             'show-fields' => 'all',

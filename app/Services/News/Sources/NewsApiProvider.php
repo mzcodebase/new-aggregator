@@ -24,6 +24,10 @@ final class NewsApiProvider extends BaseNewsProvider
 
     public function fetchArticles(): Collection
     {
+        if (! config('news_sources.newsapi.enabled', true)) {
+            return collect();
+        }
+
         $apiResponse = $this->fetchApiData('top-headlines');
 
         $articlesList = $apiResponse['articles'] ?? [];

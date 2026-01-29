@@ -16,15 +16,19 @@ final class NewYorkTimesProvider extends BaseNewsProvider
     {
         $nytConfig = config('news_sources.nyt');
         $this->apiKey = $nytConfig['key'] ?? '';
-        $configuredBaseUrl = $nytConfig['base_url'] ?? 'https://api.nytimes.com';
-        $this->baseUrl = rtrim($configuredBaseUrl, '/') . '/search/v2/';
+        $configuredBaseUrl = $nytConfig['base_url'] ?? 'https://api.nytimes.com/svc';
+        $this->baseUrl = rtrim($configuredBaseUrl, '/') . '/';
 
         parent::__construct($this->apiKey);
     }
 
     public function fetchArticles(): Collection
     {
-        $apiResponse = $this->fetch('articlesearch.json', [
+        if (! config('news_sources.nyt.enabled', true)) {
+            return collect();
+        }
+
+        $apiResponse = $this->fetch('search/v2/articlesearch.json', [
             'api-key' => $this->apiKey,
             'q' => 'news',
         ]);

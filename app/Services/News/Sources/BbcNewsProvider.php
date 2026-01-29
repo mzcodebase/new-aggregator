@@ -24,6 +24,10 @@ final class BbcNewsProvider extends BaseNewsProvider
 
     public function fetchArticles(): Collection
     {
+        if (! config('news_sources.bbc.enabled', true)) {
+            return collect();
+        }
+
         $language = config('news_sources.bbc.language', 'english');
         $apiResponse = $this->fetch('news', [
             'lang' => $language,

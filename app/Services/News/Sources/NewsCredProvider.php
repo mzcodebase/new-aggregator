@@ -23,6 +23,10 @@ final class NewsCredProvider extends BaseNewsProvider
 
     public function fetchArticles(): Collection
     {
+        if (! config('news_sources.newscred.enabled', false)) {
+            return collect();
+        }
+
         $queryParams = [];
         if ($this->apiKey !== '') {
             $queryParams['api_key'] = $this->apiKey;

@@ -23,7 +23,11 @@ final class OpenNewsProvider extends BaseNewsProvider
 
     public function fetchArticles(): Collection
     {
-        $endpoint = config('news_sources.opennews.articles_endpoint', 'api/news');
+        if (! config('news_sources.opennews.enabled', false)) {
+            return collect();
+        }
+
+        $endpoint = config('news_sources.opennews.articles_endpoint', 'api/articles');
         $apiResponse = $this->fetch($endpoint, []);
 
         $articlesList = $apiResponse['data'] ?? $apiResponse['articles'] ?? $apiResponse['latest'] ?? $apiResponse['news'] ?? [];
