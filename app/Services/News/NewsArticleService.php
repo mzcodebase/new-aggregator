@@ -4,6 +4,8 @@ namespace App\Services\News;
 
 use App\DataTransferObjects\NewsArticleDto;
 use App\Models\Article;
+use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Facades\Cache;
@@ -42,6 +44,35 @@ final class NewsArticleService
 
             return NewsArticleDto::collect($paginator->appends(Request::query()));
         });
+    }
+
+    /**
+     * Get articles filtered by user feed preferences (sources, categories, authors).
+     */
+    public function getArticlesForFeed(User $user): LengthAwarePaginator
+    {
+        $prefs = $user->preferences;
+        $query = Article::query()->with(['authors', 'categories']);
+
+        if ($prefs) {
+            if (! empty($prefs->preferred_sources)) {
+                $query->whereIn('source', $prefs->preferred_sources);
+            }
+            if (! empty($prefs->preferred_category_ids)) {
+                $query->whereHas('categories', function ($q) use ($prefs) {
+                    $q->whereIn('categories.id', $prefs->preferred_category_ids);
+                });
+            }
+            if (! empty($prefs->preferred_author_ids)) {
+                $query->whereHas('authors', function ($q) use ($prefs) {
+                    $q->whereIn('authors.id', $prefs->preferred_author_ids);
+                });
+            }
+        }
+
+        $paginator = $query->orderByDesc('published_at')->paginate(15)->appends(Request::query());
+
+        return NewsArticleDto::collect($paginator);
     }
 
     private function buildCacheKey(array $queryParams): string
