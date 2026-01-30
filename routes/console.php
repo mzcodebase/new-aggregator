@@ -13,3 +13,6 @@ $sources = ['newsapi', 'guardian', 'nyt', 'bbc'];
 foreach ($sources as $source) {
     Schedule::job(new FetchArticlesJob($source))->hourly();
 }
+
+// Fetch news from all sources every 5 minutes
+Schedule::command('news:fetch')->everyFiveMinutes();
