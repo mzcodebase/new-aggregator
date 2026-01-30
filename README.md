@@ -4,79 +4,118 @@ A powerful Laravel  application that aggregates news from multiple sources inclu
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed on your system:
+- **Docker Desktop** ([download](https://www.docker.com/products/docker-desktop/))
 
-- **PHP** >= 8.2
-- **Composer** >= 2.0
-- **MySQL** >= 8.0
-- **Node.js** >= 18.x (for frontend assets)
-- **Git**
+---
 
-## Installation
+## Docker Setup (Laravel Sail)
 
-### 1. Clone the Repository
+The project runs fully in Docker: Laravel app, MySQL, Redis, Vite dev server, and queue worker all start with one command.
 
-```
+### 1. Clone and install PHP dependencies
+
+```bash
 git clone https://github.com/mzcodebase/new-aggregator.git
 cd new-aggregator
-```
-
-### 2. Install Dependencies
-
-```
 composer install
 ```
 
-### 3. Environment Configuration
+### 2. Environment file
 
-Copy the environment example file:
-
-```
+```bash
 cp .env.example .env
-```
-
-### 4. Generate Application Key
-
-```
 php artisan key:generate
 ```
 
-### 5. Database Setup
+Edit `.env` and set these for Sail:
 
-Configure your database connection in the `.env` file:
+| Variable        | Value (for Sail)                          |
+|----------------|-------------------------------------------|
+| `APP_URL`      | `http://localhost` or `http://localhost:8080` |
+| `APP_PORT`     | `80` (or `8080` if port 80 is in use)    |
+| `DB_CONNECTION`| `mysql`                                  |
+| `DB_HOST`      | `mysql`                                  |
+| `DB_PORT`      | `3306`                                   |
+| `DB_DATABASE`  | `laravel` or `news_aggregator`            |
+| `DB_USERNAME`  | `sail`                                   |
+| `DB_PASSWORD`  | `password`                               |
+| `REDIS_HOST`   | `redis`                                  |
+
+### 3. Start all services
+
+```bash
+./vendor/bin/sail up -d
+```
+
+This starts:
+
+- **laravel.test** – Laravel app (PHP)
+- **vite** – Frontend dev server (Vue/Vite); no need to run `npm run dev` manually
+- **queue** – Queue worker for background jobs (e.g. fetching articles)
+- **mysql** – MySQL 8.4
+- **redis** – Redis
+
+The first run may take a few minutes (build + pull). Subsequent runs are quick.
+
+### 4. First-time setup
+
+```bash
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail npm run build
+```
+
+(Optional: run `./vendor/bin/sail npm install` if the vite service hasn’t installed deps yet.)
+
+### 5. Access the application
+
+- **Web UI:** http://localhost (or http://localhost:8080 if `APP_PORT=8080`)
+- **API base:** http://localhost/api/v1 (or http://localhost:8080/api/v1)
+
+The frontend is served by the **vite** container (hot reload). The **queue** container runs jobs in the background.
+
+### 6. Custom port (e.g. when port 80 is in use)
+
+In `.env`:
 
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=news_aggregator
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+APP_URL=http://localhost:8080
+APP_PORT=8080
 ```
 
-### 6. Run Migrations
+Then:
 
-```
-php artisan migrate
-```
-
-### 7. Seed the Database
-
-```
-php artisan db:seed
+```bash
+./vendor/bin/sail down
+./vendor/bin/sail up -d
 ```
 
-You need to create accounts and obtain API keys from the following news sources:
+### 7. Sail command reference
 
-### Required API Accounts
+| Task              | Command                              |
+|-------------------|--------------------------------------|
+| Start containers  | `./vendor/bin/sail up -d`            |
+| Stop containers   | `./vendor/bin/sail down`             |
+| Run Artisan       | `./vendor/bin/sail artisan <cmd>`    |
+| Run Composer      | `./vendor/bin/sail composer <cmd>`   |
+| Run NPM           | `./vendor/bin/sail npm <cmd>`        |
+| View logs         | `./vendor/bin/sail logs -f`          |
+| Shell into app    | `./vendor/bin/sail shell`            |
 
-| Provider | Website | Documentation |
-|----------|---------|---------------|
-| **NewsAPI.org** | [https://newsapi.org/](https://newsapi.org/) | [Docs](https://newsapi.org/docs) |
-| **The Guardian** | [https://open-platform.theguardian.com/](https://open-platform.theguardian.com/) | [Docs](https://open-platform.theguardian.com/documentation/) |
-| **New York Times** | [https://developer.nytimes.com/](https://developer.nytimes.com/) | [Docs](https://developer.nytimes.com/docs) |
+---
 
-### Environment Variables
+## Required API accounts (news sources)
+
+Create accounts and obtain API keys from the following sources:
+
+| Provider       | Website                                               | Documentation |
+|----------------|--------------------------------------------------------|---------------|
+| **NewsAPI.org**| [newsapi.org](https://newsapi.org/)                   | [Docs](https://newsapi.org/docs) |
+| **The Guardian** | [open-platform.theguardian.com](https://open-platform.theguardian.com/) | [Docs](https://open-platform.theguardian.com/documentation/) |
+| **New York Times** | [developer.nytimes.com](https://developer.nytimes.com/) | [Docs](https://developer.nytimes.com/docs) |
+
+### Environment variables (news APIs)
+
+Add to `.env`:
 
 ```env
 NEWSAPI_ENABLED=true
@@ -97,49 +136,39 @@ BBC_API_URL=https://bbc-news-api.vercel.app
 BBC_LANGUAGE=english
 ```
 
-## 🏃‍♂️ Running the Application
+---
 
-### Development Server
+## Running the application
 
-```bash
-php artisan serve
-```
+After `./vendor/bin/sail up -d`:
 
-The application will be available at `http://localhost:8000`
-### Run the Scheduler
-The scheduler dispatches fetching articles job at the configured intervals(every minute):
-```
-php artisan schedule:work
-```
-### Run Queue Worker background job - API Article Fetching
-```
-php artisan queue:work
-```
-### Base URL
-```
-http://localhost:8000/api/v1
-```
+- **Web:** http://localhost (or http://localhost:8080)  
+- **API:** http://localhost/api/v1 (or http://localhost:8080/api/v1)  
 
-## 🔄 Data Synchronization
-
-The application includes commands to fetch and sync data from news sources:
-
-```
-# Fetch articles from all sources
-php artisan fetch:articles
-
-# Fetch from specific source
-php artisan fetch:articles --source=newsapi
-php artisan fetch:articles --source=guardian
-php artisan fetch:articles --source=nyt
-```
-
-## 🆘 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/mzcodebase/new-aggregator/issues) page
-2. Create a new issue with detailed information
-3. Provide error logs and environment details
+The **vite** and **queue** services run automatically; no need to run `npm run dev` or `queue:work` manually.
 
 ---
+
+## Data synchronization
+
+Fetch and sync articles from news sources:
+
+```bash
+# All sources
+./vendor/bin/sail artisan fetch:articles
+
+# Specific source
+./vendor/bin/sail artisan fetch:articles --source=newsapi
+./vendor/bin/sail artisan fetch:articles --source=guardian
+./vendor/bin/sail artisan fetch:articles --source=nyt
+```
+
+---
+
+## Support
+
+If you encounter issues:
+
+1. Check the [Issues](https://github.com/mzcodebase/new-aggregator/issues) page
+2. Create a new issue with details
+3. Include error logs and environment (OS, Docker version, etc.)
